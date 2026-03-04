@@ -38,17 +38,39 @@ def scan_videos_by_keyword(keyword: str, max_results=20):
         comments = int(stats.get("commentCount", 0))
         video_id = item["id"]
 
+        # results.append({
+        #     "video_id": item["id"],
+        #     "video_url": f"https://youtube.com/watch?v={video_id}",
+        #     "title": snippet["title"],
+        #     "channel": snippet["channelTitle"],
+        #     "published_at": snippet["publishedAt"],
+        #     "views": views,
+        #     "likes": likes,
+        #     "comments": comments,
+        #     "duration_seconds": duration_seconds,
+        #     "video_type": classify_video_length(duration_seconds),
+        #     "engagement_rate": calculate_engagement(likes, comments, views),
+        #     "tags": list(set(snippet.get("tags", [])))
+        # })
         results.append({
-            "video_id": item["id"],
+            "video_id": video_id,
             "video_url": f"https://youtube.com/watch?v={video_id}",
-            "title": snippet["title"],
-            "channel": snippet["channelTitle"],
-            "published_at": snippet["publishedAt"],
+            "title": snippet.get("title"),
+            "description": snippet.get("description"),
+            "channel_id": snippet.get("channelId"),
+            "channel": snippet.get("channelTitle"),
+            "published_at": snippet.get("publishedAt"),
+            "category_id": snippet.get("categoryId"),
+            "default_language": snippet.get("defaultLanguage"),
+            "audio_language": snippet.get("defaultAudioLanguage"),
+            "thumbnail": snippet.get("thumbnails", {}).get("high", {}).get("url"),
             "views": views,
             "likes": likes,
             "comments": comments,
             "duration_seconds": duration_seconds,
             "video_type": classify_video_length(duration_seconds),
+            "definition": content.get("definition"),
+            "has_caption": content.get("caption") == "true",
             "engagement_rate": calculate_engagement(likes, comments, views),
             "tags": list(set(snippet.get("tags", [])))
         })

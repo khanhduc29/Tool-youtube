@@ -1,46 +1,85 @@
+
 # from core.channel_service import scan_channels_by_keyword
 # from core.video_service import scan_videos_by_keyword
 # from core.comment_service import scan_video_comments
 # from utils.file_saver import save_json, save_csv
 
 
+# def extract_video_id(url: str):
+#     import re
+#     match = re.search(r"v=([^&]+)", url)
+#     return match.group(1) if match else None
+
+
 # def run():
-#     keyword = input("🔎 Enter keyword: ")
+#     print("====== YOUTUBE TOOL ======")
 
-#     print("\n=== CHANNELS ===")
-#     channels = scan_channels_by_keyword(keyword)
-#     for c in channels:
-#         print(c)
+#     keyword = input("🔎 Keyword / Video URL: ")
+#     data_type = input("📂 Type (channel / video / comment): ").lower()
+#     limit_input = input("📊 Limit (default 20): ")
 
-#     save_json(channels, "channels", keyword)
-#     save_csv(channels, "channels", keyword)
+#     limit = int(limit_input) if limit_input.isdigit() else 20
 
-#     print("\n=== VIDEOS ===")
-#     videos = scan_videos_by_keyword(keyword)
-#     for v in videos:
-#         print(v)
+#     # =============================
+#     # CHANNEL
+#     # =============================
+#     if data_type == "channel":
+#         data = scan_channels_by_keyword(keyword, max_results=limit)
 
-#     save_json(videos, "videos", keyword)
-#     save_csv(videos, "videos", keyword)
+#         print("\n=== CHANNELS ===")
+#         for item in data:
+#             print(item)
 
-#     if videos:
-#         print("\n=== COMMENTS (First Video) ===")
-#         comments = scan_video_comments(videos[0]["video_id"])
-#         for c in comments:
-#             print(c)
+#         save_json(data, "channels", keyword)
+#         save_csv(data, "channels", keyword)
 
-#         save_json(comments, "comments", keyword)
-#         save_csv(comments, "comments", keyword)
+#     # =============================
+#     # VIDEO
+#     # =============================
+#     elif data_type == "video":
+#         data = scan_videos_by_keyword(keyword, max_results=limit)
+
+#         print("\n=== VIDEOS ===")
+#         for item in data:
+#             print(item)
+
+#         save_json(data, "videos", keyword)
+#         save_csv(data, "videos", keyword)
+
+#     # =============================
+#     # COMMENT
+#     # =============================
+#     elif data_type == "comment":
+#         video_id = extract_video_id(keyword)
+
+#         if not video_id:
+#             print("❌ Invalid YouTube video URL")
+#             return
+
+#         data = scan_video_comments(video_id, max_results=limit)
+
+#         print("\n=== COMMENTS ===")
+#         for item in data:
+#             print(item)
+
+#         save_json(data, "comments", video_id)
+#         save_csv(data, "comments", video_id)
+
+#     else:
+#         print("❌ Invalid type. Choose channel / video / comment")
 
 
 # if __name__ == "__main__":
 #     run()
 
+import time
+import requests
 
 from core.channel_service import scan_channels_by_keyword
 from core.video_service import scan_videos_by_keyword
 from core.comment_service import scan_video_comments
-from utils.file_saver import save_json, save_csv
+
+API_BASE_URL = "http://localhost:3000"
 
 
 def extract_video_id(url: str):
@@ -49,63 +88,118 @@ def extract_video_id(url: str):
     return match.group(1) if match else None
 
 
-def run():
-    print("====== YOUTUBE TOOL ======")
+def get_pending_task():
+    try:
+        res = requests.get(f"{API_BASE_URL}/api/youtube/task/pending")
+        data = res.json()
+        return data.get("data")
+    except Exception as e:
+        print("❌ Error fetching task:", e)
+        return None
 
-    keyword = input("🔎 Keyword / Video URL: ")
-    data_type = input("📂 Type (channel / video / comment): ").lower()
-    limit_input = input("📊 Limit (default 20): ")
 
-    limit = int(limit_input) if limit_input.isdigit() else 20
+def update_task(task_id, status, result=None, error_message=None):
+    try:
+        payload = {
+            "status": status,
+            "result": result,
+            "error_message": error_message,
+        }
 
-    # =============================
-    # CHANNEL
-    # =============================
-    if data_type == "channel":
-        data = scan_channels_by_keyword(keyword, max_results=limit)
+        print("📡 Updating task with payload:")
+        print("   status:", status)
+        print("   result length:", len(result) if result else 0)
+        print("   error:", error_message)
 
-        print("\n=== CHANNELS ===")
-        for item in data:
-            print(item)
+        res = requests.put(
+            f"{API_BASE_URL}/api/youtube/task/{task_id}",
+            json=payload,
+        )
 
-        save_json(data, "channels", keyword)
-        save_csv(data, "channels", keyword)
+        print("📡 Update response status:", res.status_code)
+        print("📡 Update response body:", res.text)
 
-    # =============================
-    # VIDEO
-    # =============================
-    elif data_type == "video":
-        data = scan_videos_by_keyword(keyword, max_results=limit)
+    except Exception as e:
+        print("❌ Error updating task:", e)
 
-        print("\n=== VIDEOS ===")
-        for item in data:
-            print(item)
 
-        save_json(data, "videos", keyword)
-        save_csv(data, "videos", keyword)
+def process_task(task):
+    raw_scan_type = task.get("scan_type")
+    scan_type = str(raw_scan_type).strip().lower()
 
-    # =============================
-    # COMMENT
-    # =============================
-    elif data_type == "comment":
-        video_id = extract_video_id(keyword)
+    task_id = task.get("_id")
+    input_data = task.get("input", {})
 
-        if not video_id:
-            print("❌ Invalid YouTube video URL")
-            return
+    print("\n==============================")
+    print("🆔 Task ID:", task_id)
+    print("📂 Raw scan_type:", raw_scan_type)
+    print("📂 scan_type repr:", repr(raw_scan_type))
+    print("📂 scan_type normalized:", scan_type)
+    print("📂 scan_type type:", type(raw_scan_type))
+    print("📥 Input:", input_data)
+    print("==============================\n")
 
-        data = scan_video_comments(video_id, max_results=limit)
+    try:
+        if scan_type == "channels":
+            print("🔥 ENTER CHANNELS BLOCK")
+            result = scan_channels_by_keyword(
+                input_data.get("keyword"),
+                max_results=input_data.get("limit", 20),
+            )
 
-        print("\n=== COMMENTS ===")
-        for item in data:
-            print(item)
+        elif scan_type == "videos":
+            print("🔥 ENTER VIDEOS BLOCK")
+            result = scan_videos_by_keyword(
+                input_data.get("keyword"),
+                max_results=input_data.get("limit", 20),
+            )
 
-        save_json(data, "comments", video_id)
-        save_csv(data, "comments", video_id)
+        elif scan_type == "video_comments":
+            print("🔥 ENTER COMMENTS BLOCK")
 
-    else:
-        print("❌ Invalid type. Choose channel / video / comment")
+            video_id = extract_video_id(input_data.get("video_url", ""))
+
+            print("🎥 Extracted video_id:", video_id)
+
+            if not video_id:
+                raise Exception("Invalid video URL")
+
+            result = scan_video_comments(
+                video_id,
+                max_results=input_data.get("limit_comments", 50),
+            )
+
+        else:
+            raise Exception(f"Unsupported scan_type: {scan_type}")
+
+        print("📊 Result type:", type(result))
+        print("📊 Result length:", len(result) if result else 0)
+
+        if result:
+            print("🔎 First result sample:")
+            print(result[0])
+
+        update_task(task_id, "success", result=result)
+        print("✅ Task completed")
+
+    except Exception as e:
+        print("❌ Task failed:", str(e))
+        update_task(task_id, "error", error_message=str(e))
+
+
+def run_worker():
+    print("🎯 YouTube Worker Started...")
+
+    while True:
+        task = get_pending_task()
+
+        if task:
+            process_task(task)
+        else:
+            print("⏳ No pending task 50sleeping...")
+
+        time.sleep(50)
 
 
 if __name__ == "__main__":
-    run()
+    run_worker()

@@ -20,16 +20,32 @@ def scan_channels_by_keyword(keyword: str, max_results=20):
         snippet = info["snippet"]
         stats = info["statistics"]
 
+        # results.append({
+        #     "name": snippet["title"],
+        #     "channel_id": channel_id,
+        #     "channel_url": f"https://youtube.com/channel/{channel_id}",
+        #     "avatar": snippet["thumbnails"]["default"]["url"],
+        #     "subscribers": int(stats.get("subscriberCount", 0)),
+        #     "total_videos": int(stats.get("videoCount", 0)),
+        #     "total_views": int(stats.get("viewCount", 0)),
+        #     "created_at": snippet["publishedAt"],
+        #     "description": snippet["description"]
+        # })
         results.append({
-            "name": snippet["title"],
+            "name": snippet.get("title"),
             "channel_id": channel_id,
             "channel_url": f"https://youtube.com/channel/{channel_id}",
-            "avatar": snippet["thumbnails"]["default"]["url"],
+            "custom_url": snippet.get("customUrl"),
+            "avatar": snippet.get("thumbnails", {}).get("default", {}).get("url"),
             "subscribers": int(stats.get("subscriberCount", 0)),
             "total_videos": int(stats.get("videoCount", 0)),
             "total_views": int(stats.get("viewCount", 0)),
-            "created_at": snippet["publishedAt"],
-            "description": snippet["description"]
+            "created_at": snippet.get("publishedAt"),
+            "description": snippet.get("description"),
+            "country": snippet.get("country"),
+            "default_language": info.get("brandingSettings", {}).get("channel", {}).get("defaultLanguage"),
+            "keywords": info.get("brandingSettings", {}).get("channel", {}).get("keywords"),
+            "topics": info.get("topicDetails", {}).get("topicCategories")
         })
 
     return results
