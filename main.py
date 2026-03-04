@@ -145,6 +145,7 @@ def process_task(task):
             result = scan_channels_by_keyword(
                 input_data.get("keyword"),
                 max_results=input_data.get("limit", 20),
+                deep_scan_social=input_data.get("deep_scan_social", False)
             )
 
         elif scan_type == "videos":
