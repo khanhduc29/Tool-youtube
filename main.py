@@ -94,7 +94,7 @@ def get_pending_task():
         data = res.json()
         return data.get("data")
     except Exception as e:
-        print("❌ Error fetching task:", e)
+        print("Error fetching task:", e)
         return None
 
 
@@ -106,7 +106,7 @@ def update_task(task_id, status, result=None, error_message=None):
             "error_message": error_message,
         }
 
-        print("📡 Updating task with payload:")
+        print(" Updating task with payload:")
         print("   status:", status)
         print("   result length:", len(result) if result else 0)
         print("   error:", error_message)
@@ -116,11 +116,11 @@ def update_task(task_id, status, result=None, error_message=None):
             json=payload,
         )
 
-        print("📡 Update response status:", res.status_code)
-        print("📡 Update response body:", res.text)
+        print("Update response status:", res.status_code)
+        print("Update response body:", res.text)
 
     except Exception as e:
-        print("❌ Error updating task:", e)
+        print("Error updating task:", e)
 
 
 def process_task(task):
@@ -131,17 +131,17 @@ def process_task(task):
     input_data = task.get("input", {})
 
     print("\n==============================")
-    print("🆔 Task ID:", task_id)
-    print("📂 Raw scan_type:", raw_scan_type)
-    print("📂 scan_type repr:", repr(raw_scan_type))
-    print("📂 scan_type normalized:", scan_type)
-    print("📂 scan_type type:", type(raw_scan_type))
-    print("📥 Input:", input_data)
+    print("Task ID:", task_id)
+    print("Raw scan_type:", raw_scan_type)
+    print("scan_type repr:", repr(raw_scan_type))
+    print("scan_type normalized:", scan_type)
+    print("scan_type type:", type(raw_scan_type))
+    print("Input:", input_data)
     print("==============================\n")
 
     try:
         if scan_type == "channels":
-            print("🔥 ENTER CHANNELS BLOCK")
+            print("ENTER CHANNELS BLOCK")
             result = scan_channels_by_keyword(
                 input_data.get("keyword"),
                 max_results=input_data.get("limit", 20),
@@ -149,18 +149,18 @@ def process_task(task):
             )
 
         elif scan_type == "videos":
-            print("🔥 ENTER VIDEOS BLOCK")
+            print("ENTER VIDEOS BLOCK")
             result = scan_videos_by_keyword(
                 input_data.get("keyword"),
                 max_results=input_data.get("limit", 20),
             )
 
         elif scan_type == "video_comments":
-            print("🔥 ENTER COMMENTS BLOCK")
+            print("ENTER COMMENTS BLOCK")
 
             video_id = extract_video_id(input_data.get("video_url", ""))
 
-            print("🎥 Extracted video_id:", video_id)
+            print("Extracted video_id:", video_id)
 
             if not video_id:
                 raise Exception("Invalid video URL")
@@ -173,23 +173,23 @@ def process_task(task):
         else:
             raise Exception(f"Unsupported scan_type: {scan_type}")
 
-        print("📊 Result type:", type(result))
-        print("📊 Result length:", len(result) if result else 0)
+        print("Result type:", type(result))
+        print("Result length:", len(result) if result else 0)
 
         if result:
             print("🔎 First result sample:")
             print(result[0])
 
         update_task(task_id, "success", result=result)
-        print("✅ Task completed")
+        print("Task completed")
 
     except Exception as e:
-        print("❌ Task failed:", str(e))
+        print("Task failed:", str(e))
         update_task(task_id, "error", error_message=str(e))
 
 
 def run_worker():
-    print("🎯 YouTube Worker Started...")
+    print("YouTube Worker Started...")
 
     while True:
         task = get_pending_task()
