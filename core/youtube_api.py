@@ -9,7 +9,7 @@ def safe_execute(request):
     try:
         return request.execute()
     except HttpError as e:
-        print(f"❌ YouTube API Error: {e}")
+        print(f"YouTube API Error: {e}")
         return None
 
 

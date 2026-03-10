@@ -26,7 +26,7 @@ def save_json(data, prefix: str, keyword: str):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
-    print(f"✅ Saved JSON: {path}")
+    print(f"Saved JSON: {path}")
 
 
 def save_csv(data, prefix: str, keyword: str):
@@ -44,4 +44,4 @@ def save_csv(data, prefix: str, keyword: str):
         writer.writeheader()
         writer.writerows(data)
 
-    print(f"✅ Saved CSV: {path}")
+    print(f"Saved CSV: {path}")

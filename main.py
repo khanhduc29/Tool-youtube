@@ -72,6 +72,15 @@
 # if __name__ == "__main__":
 #     run()
 
+import sys
+import os
+
+from flask import json
+
+os.environ["PYTHONIOENCODING"] = "utf-8"
+
+sys.stdout.reconfigure(encoding="utf-8")
+sys.stderr.reconfigure(encoding="utf-8")
 import time
 import requests
 
@@ -130,13 +139,13 @@ def process_task(task):
     task_id = task.get("_id")
     input_data = task.get("input", {})
 
-    print("\n==============================")
-    print("Task ID:", task_id)
-    print("Raw scan_type:", raw_scan_type)
-    print("scan_type repr:", repr(raw_scan_type))
-    print("scan_type normalized:", scan_type)
-    print("scan_type type:", type(raw_scan_type))
-    print("Input:", input_data)
+    # print("\n==============================")
+    # print("Task ID:", task_id)
+    # print("Raw scan_type:", raw_scan_type)
+    # print("scan_type repr:", repr(raw_scan_type))
+    # print("scan_type normalized:", scan_type)
+    # print("scan_type type:", type(raw_scan_type))
+    # print("Input:", input_data)
     print("==============================\n")
 
     try:
@@ -177,8 +186,8 @@ def process_task(task):
         print("Result length:", len(result) if result else 0)
 
         if result:
-            print("🔎 First result sample:")
-            print(result[0])
+            print("done")
+            # print(json.dumps(result[0], ensure_ascii=False, indent=2))
 
         update_task(task_id, "success", result=result)
         print("Task completed")
@@ -197,7 +206,7 @@ def run_worker():
         if task:
             process_task(task)
         else:
-            print("⏳ No pending task 50sleeping...")
+            print("No pending task 50sleeping...")
 
         time.sleep(50)
 

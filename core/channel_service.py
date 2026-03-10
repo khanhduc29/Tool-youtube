@@ -23,7 +23,7 @@ def scan_channels_by_keyword(keyword: str, max_results=20, deep_scan_social=Fals
     # =================================
     if deep_scan_social:
 
-        print("🚀 Starting Playwright browser")
+        print("Starting Playwright browser")
 
         playwright, browser = start_browser()
 
@@ -66,7 +66,7 @@ def scan_channels_by_keyword(keyword: str, max_results=20, deep_scan_social=Fals
         # =================================
         if deep_scan_social:
 
-            print(f"🔎 Crawling social links: {channel_id}")
+            print(f"Crawling social links: {channel_id}")
 
             try:
 
@@ -76,7 +76,7 @@ def scan_channels_by_keyword(keyword: str, max_results=20, deep_scan_social=Fals
 
             except Exception as e:
 
-                print(f"❌ Crawl failed {channel_id}: {e}")
+                print(f"Crawl failed {channel_id}: {e}")
 
                 result["social_links"] = []
 
@@ -93,6 +93,6 @@ def scan_channels_by_keyword(keyword: str, max_results=20, deep_scan_social=Fals
 
         playwright.stop()
 
-        print("🛑 Browser closed")
+        print("Browser closed")
 
     return results
