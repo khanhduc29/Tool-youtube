@@ -125,8 +125,8 @@ def update_task(task_id, status, result=None, error_message=None):
             json=payload,
         )
 
-        print("Update response status:", res.status_code)
-        print("Update response body:", res.text)
+        # print("Update response status:", res.status_code)
+        # print("Update response body:", res.text)
 
     except Exception as e:
         print("Error updating task:", e)
