@@ -79,7 +79,7 @@ from core.channel_service import scan_channels_by_keyword
 from core.video_service import scan_videos_by_keyword
 from core.comment_service import scan_video_comments
 
-API_BASE_URL = "http://localhost:3000"
+API_BASE_URL = "https://be-tool-crawldata.onrender.com"
 
 
 def extract_video_id(url: str):
